@@ -1,8 +1,6 @@
 # Nadsat Vocabulary
 
-The complete lexicon behind **The Clockwork Translator** — the teen argot Anthony Burgess invented for *A Clockwork Orange* (1962). Nadsat is English laced with slang, mostly adapted from Russian, with borrowings from German, French, Malay and Romani, some Cockney rhyming slang, and childish coinages.
-
-**242 entries.** Meanings reworded; etymologies list factual root words, with Cyrillic where known.
+The complete lexicon behind **The Clockwork Translator** :
 
 | Nadsat | English | Part of speech | Origin | Root / etymology |
 | --- | --- | --- | --- | --- |
