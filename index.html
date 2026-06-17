@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Clockwork Translator · Nadsat ⇄ English</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --milk:#F2EFE6; --ink:#16110E; --mech:#221C18; --console:#1B1512;
+  --orange:#FF5A1F; --krovvy:#8E1B12; --steel:#6E6A60;
+  --milk-dim:#CFC8BC; --label:#A39C8E; --line:#D8D2C5; --line-dk:#3A322B;
+  --z-base:1; --z-sticky:100; --z-tooltip:600;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--milk); color:var(--ink);
+  font-family:"Newsreader",Georgia,serif; font-size:18px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(circle at 1px 1px, rgba(22,17,14,.05) 1px, transparent 0);
+  background-size:26px 26px;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.mono{font-family:"Space Mono",ui-monospace,monospace}
+.eyebrow{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--steel)}
+
+/* ---------- masthead ---------- */
+header.mast{position:relative;overflow:hidden;border-bottom:2px solid var(--ink)}
+.mast .wrap{padding:34px 24px 30px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brandmark{display:flex;align-items:center;gap:11px}
+.cog{width:26px;height:26px;color:var(--orange);animation:spin 26s linear infinite}
+.cog.rev{animation-direction:reverse;width:18px;height:18px;opacity:.5}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brandmark b{font-family:"Space Mono",monospace;font-weight:700;font-size:13px;letter-spacing:.2em;text-transform:uppercase}
+.title{margin:26px 0 0;font-family:"Archivo",sans-serif;font-weight:900;
+  font-size:clamp(1.9rem,8.4vw,5.6rem);line-height:.92;letter-spacing:-.03em;text-wrap:balance;text-transform:uppercase}
+.title .swap{color:var(--orange);font-weight:500;font-family:"Space Mono",monospace;font-size:.42em;vertical-align:middle;letter-spacing:0;padding:0 .12em}
+.title .o{position:relative;display:inline-block}
+.title .o::after{content:"";position:absolute;right:-.04em;bottom:.14em;width:.16em;height:.16em;background:var(--orange);border-radius:50%}
+.dek{margin-top:18px;max-width:60ch;font-size:1.18rem;color:#3a322b;text-wrap:pretty}
+.dek em{font-style:italic;color:var(--krovvy)}
+.ghost-gear{position:absolute;right:-90px;top:-70px;width:340px;height:340px;color:rgba(22,17,14,.045);z-index:0;animation:spin 90s linear infinite}
+.mast .wrap{position:relative;z-index:1}
+
+/* ---------- console ---------- */
+.console-shell{margin:38px 0 10px}
+.console{background:var(--console);color:var(--milk);border-radius:14px;
+  box-shadow:0 1px 0 #4a4036 inset,0 30px 60px -30px rgba(22,17,14,.55);
+  border:1px solid var(--line-dk);overflow:visible}
+.console-head{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:13px 16px;border-bottom:1px solid var(--line-dk);flex-wrap:wrap}
+.dirseg{display:inline-flex;background:#100c0a;border:1px solid var(--line-dk);border-radius:9px;padding:3px}
+.dirseg button{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--label);background:none;border:0;padding:8px 13px;border-radius:6px;cursor:pointer;transition:color .2s}
+.dirseg button[aria-pressed="true"]{background:var(--orange);color:var(--ink);font-weight:700}
+.swapbtn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--line-dk);
+  color:var(--milk-dim);font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.06em;
+  padding:8px 12px;border-radius:8px;cursor:pointer;text-transform:uppercase;transition:border-color .2s,color .2s}
+.swapbtn:hover{border-color:var(--orange);color:var(--orange)}
+.swapbtn svg{width:15px;height:15px}
+.ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pill{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--line-dk);
+  color:var(--milk-dim);font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.06em;
+  padding:8px 12px;border-radius:8px;cursor:pointer;text-transform:uppercase;transition:border-color .2s,color .2s}
+.pill:hover{border-color:var(--orange);color:var(--orange)}
+.pill[aria-pressed="true"]{border-color:var(--orange);color:var(--orange);box-shadow:0 0 0 1px var(--orange) inset}
+.pill .led{width:7px;height:7px;border-radius:50%;background:#4a4036;transition:background .2s}
+.pill[aria-pressed="true"] .led{background:var(--orange);box-shadow:0 0 6px var(--orange)}
+.minibtn{background:none;border:1px solid var(--line-dk);color:var(--milk-dim);font-family:"Space Mono",monospace;
+  font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:7px 10px;border-radius:8px;cursor:pointer;transition:.2s}
+.minibtn:hover{border-color:var(--orange);color:var(--orange)}
+.minibtn[hidden]{display:none}
+.labL{display:flex;align-items:baseline;gap:8px}
+.copybtn{background:none;border:1px solid var(--line-dk);color:var(--label);font-family:"Space Mono",monospace;
+  font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:6px;cursor:pointer;transition:.2s}
+.copybtn:hover{border-color:var(--orange);color:var(--orange)}
+.copybtn.ok{border-color:var(--orange);color:var(--orange)}
+.share{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--line-dk);
+  color:var(--label);font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  padding:5px 11px;border-radius:6px;cursor:pointer;transition:.2s}
+.share:hover{border-color:var(--orange);color:var(--orange)}
+.share svg{width:13px;height:13px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);
+  color:var(--milk);font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.03em;padding:11px 18px;border-radius:9px;
+  border:1px solid var(--line-dk);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s var(--ease);z-index:var(--z-tooltip)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.chambers{display:grid;grid-template-columns:1fr 64px 1fr}
+.chamber{padding:20px 22px 22px;min-width:0}
+.chamber .lab{display:flex;align-items:baseline;gap:8px;margin-bottom:11px}
+.chamber .lab .n{font-family:"Space Mono",monospace;font-size:11px;color:var(--orange);letter-spacing:.15em}
+.chamber .lab .t{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--label)}
+#src{width:100%;min-height:188px;resize:vertical;background:var(--mech);color:var(--milk);
+  border:1px solid var(--line-dk);border-radius:9px;padding:15px 16px;font-family:"Newsreader",serif;
+  font-size:1.22rem;line-height:1.5;caret-color:var(--orange)}
+#src::placeholder{color:#857d70}
+#src:focus{outline:2px solid var(--orange);outline-offset:2px;border-color:transparent}
+#out{min-height:188px;background:transparent;font-size:1.22rem;line-height:1.5;word-break:break-word}
+#out .pass{color:var(--milk-dim)}
+#out .hit{position:relative;color:var(--ink);background:var(--orange);border-radius:4px;
+  padding:0 .18em;margin:0 -.02em;cursor:help;animation:stamp .42s var(--ease) both}
+#out .hit::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%) translateY(4px);
+  background:var(--ink);color:var(--milk);font-family:"Space Mono",monospace;font-size:11px;line-height:1.45;
+  letter-spacing:.02em;white-space:normal;width:max-content;max-width:260px;padding:8px 10px;border-radius:7px;
+  border:1px solid var(--line-dk);opacity:0;pointer-events:none;transition:opacity .16s,transform .16s;z-index:var(--z-tooltip)}
+#out .hit::before{content:"";position:absolute;left:50%;bottom:calc(100% + 4px);transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--ink);opacity:0;transition:opacity .16s;z-index:var(--z-tooltip)}
+#out .hit:hover::after,#out .hit:focus::after{opacity:1;transform:translateX(-50%) translateY(0)}
+#out .hit:hover::before,#out .hit:focus::before{opacity:1}
+#out .placeholder{color:#6c6458;font-style:italic}
+@keyframes stamp{from{opacity:0;transform:translateY(3px) scale(.94)}to{opacity:1;transform:none}}
+.gearbox{display:flex;align-items:center;justify-content:center;border-left:1px dashed var(--line-dk);border-right:1px dashed var(--line-dk)}
+.gearbox svg{width:30px;height:30px;color:#4a4036;transition:color .3s}
+.gearbox.tick svg{color:var(--orange)}
+.gearbox svg.spin{animation:spin 5s linear infinite}
+.readout{display:flex;gap:20px;padding:11px 22px;border-top:1px solid var(--line-dk);flex-wrap:wrap;align-items:center;
+  font-family:"Space Mono",monospace;font-size:11.5px;letter-spacing:.08em;color:var(--label);text-transform:uppercase}
+.readout b{color:var(--orange);font-weight:700}
+.examples{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:18px 2px 6px}
+.examples span{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel);margin-right:4px}
+.chip{font-family:"Newsreader",serif;font-size:.96rem;font-style:italic;background:none;border:1px solid var(--line);
+  color:#3a322b;padding:6px 13px;border-radius:20px;cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--ink);background:var(--ink);color:var(--milk);font-style:normal}
+
+/* ---------- dictionary ---------- */
+.dict{margin:64px 0 30px;border-top:2px solid var(--ink);padding-top:34px}
+.dict-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+.dict h2{font-family:"Archivo",sans-serif;font-weight:900;font-size:clamp(1.8rem,5vw,2.9rem);
+  letter-spacing:-.025em;text-transform:uppercase;line-height:1}
+.dict h2 small{display:block;font-family:"Space Mono",monospace;font-size:12px;font-weight:400;
+  letter-spacing:.18em;color:var(--steel);text-transform:uppercase;margin-bottom:8px}
+.search{position:relative;min-width:min(320px,100%)}
+.search input{width:100%;background:var(--milk);border:1px solid var(--ink);border-radius:9px;
+  padding:12px 14px 12px 38px;font-family:"Space Mono",monospace;font-size:14px;color:var(--ink)}
+.search input:focus{outline:2px solid var(--orange);outline-offset:2px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--steel)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.filters button{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:#4a4036;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .18s}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--milk);border-color:var(--ink)}
+.filters button:hover{border-color:var(--ink)}
+.entries{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:0 38px}
+.entry{display:grid;grid-template-columns:auto 1fr;gap:0 16px;align-items:baseline;
+  padding:13px 0;border-bottom:1px solid var(--line)}
+.entry .term{font-family:"Space Mono",monospace;font-weight:700;font-size:1.04rem;color:var(--ink)}
+.entry .right{min-width:0}
+.entry .mean{font-size:1.06rem}
+.entry .mean .tag{font-style:italic;color:var(--steel);font-size:.92rem}
+.entry .ety{font-family:"Space Mono",monospace;font-size:11.5px;color:var(--steel);margin-top:3px;line-height:1.5}
+.entry .ori{display:inline-block;font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--krovvy);border:1px solid #e3cdc9;border-radius:4px;padding:1px 6px;margin-top:5px}
+.nohits{font-style:italic;color:var(--steel);padding:30px 0}
+
+/* ---------- footer ---------- */
+footer{border-top:2px solid var(--ink);margin-top:50px;padding:30px 0 60px}
+footer .wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:34px}
+footer p{font-size:.96rem;color:#3a322b;max-width:62ch}
+footer h3{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);margin-bottom:10px}
+footer .src{font-family:"Space Mono",monospace;font-size:11.5px;color:var(--steel);line-height:1.7}
+footer .lim{font-size:.9rem;color:var(--steel);margin-top:8px}
+.credit{border-top:1px solid var(--line);margin-top:30px;padding-top:18px;display:flex;justify-content:space-between;
+  align-items:center;gap:14px;flex-wrap:wrap;font-family:"Space Mono",monospace;font-size:11.5px;letter-spacing:.05em;color:var(--steel)}
+.credit a{display:inline-flex;align-items:center;gap:7px;color:var(--ink);text-decoration:none;
+  border:1px solid var(--line);border-radius:7px;padding:6px 11px;transition:border-color .2s,color .2s,background .2s}
+.credit a:hover{border-color:var(--ink);background:var(--ink);color:var(--milk)}
+.credit a:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.credit svg{width:15px;height:15px}
+
+@media(max-width:760px){
+  .chambers{grid-template-columns:1fr}
+  .gearbox{border:0;border-top:1px dashed var(--line-dk);border-bottom:1px dashed var(--line-dk);padding:8px 0}
+  .gearbox svg{transform:rotate(90deg)}
+  footer .wrap{grid-template-columns:1fr}
+  body{font-size:17px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+  #out .hit{animation:none !important}
+}
+</style>
+</head>
+<body>
+<header class="mast">
+  <svg class="ghost-gear" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M54 4h-8l-2 9a32 32 0 0 0-8 3l-8-5-6 6 5 8a32 32 0 0 0-3 8l-9 2v8l9 2a32 32 0 0 0 3 8l-5 8 6 6 8-5a32 32 0 0 0 8 3l2 9h8l2-9a32 32 0 0 0 8-3l8 5 6-6-5-8a32 32 0 0 0 3-8l9-2v-8l-9-2a32 32 0 0 0-3-8l5-8-6-6-8 5a32 32 0 0 0-8-3zM50 34a16 16 0 1 1 0 32 16 16 0 0 1 0-32z"/></svg>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brandmark">
+        <svg class="cog" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M54 4h-8l-2 9a32 32 0 0 0-8 3l-8-5-6 6 5 8a32 32 0 0 0-3 8l-9 2v8l9 2a32 32 0 0 0 3 8l-5 8 6 6 8-5a32 32 0 0 0 8 3l2 9h8l2-9a32 32 0 0 0 8-3l8 5 6-6-5-8a32 32 0 0 0 3-8l9-2v-8l-9-2a32 32 0 0 0-3-8l5-8-6-6-8 5a32 32 0 0 0-8-3zM50 34a16 16 0 1 1 0 32 16 16 0 0 1 0-32z"/></svg>
+        <b>Korova Milkbar · Lexical Division</b>
+      </div>
+      <span class="eyebrow" id="count">242 slovos loaded</span>
+    </div>
+    <h1 class="title">Nadsat<span class="swap">&#8644;</span>English</h1>
+    <p class="dek">A working translator for the teen argot Anthony Burgess built for <em>A Clockwork Orange</em> &mdash; English laced with Russian-born slang. Type on either side; the machine swaps what it knows and leaves the rest, just as Alex does, O my brothers.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="console-shell" aria-label="Translator">
+    <div class="console">
+      <div class="console-head">
+        <div class="dirseg" role="group" aria-label="Translation direction">
+          <button id="d-en" aria-pressed="true">English &rarr; Nadsat</button>
+          <button id="d-na" aria-pressed="false">Nadsat &rarr; English</button>
+        </div>
+        <div class="ctl">
+          <button class="pill" id="t-juv" aria-pressed="false" title="Prefer childish coinages where they exist (eggiweg, guttiwuts)"><span class="led"></span>Juvenile</button>
+          <button class="pill" id="t-shuf" aria-pressed="false" title="Pick randomly among Nadsat synonyms"><span class="led"></span>Shuffle</button>
+          <button class="minibtn" id="reroll" hidden title="Re-roll the synonym choices">&#9860; Reroll</button>
+          <button class="swapbtn" id="swap" title="Swap input and output">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>
+            Swap
+          </button>
+        </div>
+      </div>
+      <div class="chambers">
+        <div class="chamber">
+          <div class="lab"><div class="labL"><span class="n">01</span><span class="t" id="lab-src">You speak &mdash; English</span></div></div>
+          <textarea id="src" spellcheck="false" placeholder="Write something here&hellip;"></textarea>
+        </div>
+        <div class="gearbox" id="gearbox">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M54 4h-8l-2 9a32 32 0 0 0-8 3l-8-5-6 6 5 8a32 32 0 0 0-3 8l-9 2v8l9 2a32 32 0 0 0 3 8l-5 8 6 6 8-5a32 32 0 0 0 8 3l2 9h8l2-9a32 32 0 0 0 8-3l8 5 6-6-5-8a32 32 0 0 0 3-8l9-2v-8l-9-2a32 32 0 0 0-3-8l5-8-6-6-8 5a32 32 0 0 0-8-3zM50 34a16 16 0 1 1 0 32 16 16 0 0 1 0-32z"/></svg>
+        </div>
+        <div class="chamber">
+          <div class="lab"><div class="labL"><span class="n">02</span><span class="t" id="lab-out">The machine says &mdash; Nadsat</span></div><button class="copybtn" id="copy">Copy</button></div>
+          <div id="out" aria-live="polite"><span class="placeholder">&hellip;your droog-speak appears here.</span></div>
+        </div>
+      </div>
+      <div class="readout">
+        <span>words <b id="r-words">0</b></span>
+        <span>swapped <b id="r-hits">0</b></span>
+        <span>passed through <b id="r-pass">0</b></span>
+        <button class="share" id="share" title="Copy a link that restores this translation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5 8.6 10.5"/></svg>Share link</button>
+      </div>
+    </div>
+    <div class="examples" id="examples"><span>Try</span></div>
+  </section>
+
+  <section class="dict">
+    <div class="dict-head">
+      <h2><small>The Lexicon</small>Viddy the slovos</h2>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="search a word or meaning&hellip;" aria-label="Search the lexicon">
+      </div>
+    </div>
+    <div class="filters" id="filters" role="group" aria-label="Filter by origin"></div>
+    <div class="entries" id="entries"></div>
+    <p class="nohits" id="nohits" hidden>No slovos match that. Try another.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <h3>About the machine</h3>
+      <p>Nadsat isn&rsquo;t a full language &mdash; it&rsquo;s English with roughly 250 slang words mixed in, most adapted from Russian, plus a few from German, French, Malay and Romani, some Cockney rhyming slang, and childish coinages. So this translator works by substitution: multi-word terms first, then each word looked up with its plural and verb endings carried across; anything unknown passes through untouched.</p>
+      <p class="lim">Honest limits: output is lower-cased where the engine has no better guess, verb endings follow simple rules (so a few forms differ from Burgess&rsquo;s), and where one English word has several Nadsat synonyms the machine picks one. Hover any orange word to see its root.</p>
+    </div>
+    <div>
+      <h3>Sources</h3>
+      <p class="src">Lexicon compiled &amp; cross-checked from the glossaries by T. Duckworth (peevish.co.uk), artofeurope.com, and SparkNotes. Meanings reworded; etymologies list factual root words with Cyrillic where known. A Clockwork Orange &copy; Anthony Burgess, 1962.</p>
+    </div>
+  </div>
+  <div class="wrap credit">
+    <span>&copy; 2026 wuisabel-gif &middot; an independent project &mdash; not affiliated with the Anthony Burgess estate</span>
+    <a href="https://github.com/wuisabel-gif" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile: wuisabel-gif">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>github.com/wuisabel-gif</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const LEX = [{"n": "appy polly loggy", "e": "apology", "p": "n", "o": "Juvenile", "t": "childish play on 'apology'", "c": true}, {"n": "baboochka", "e": "old woman", "p": "n", "o": "Russian", "t": "babushka (бабушка) grandmother", "c": true}, {"n": "baddiwad", "e": "bad", "p": "adj", "o": "Juvenile", "t": "childish play on 'bad'", "c": false}, {"n": "banda", "e": "band; gang", "p": "n", "o": "Russian", "t": "banda (банда) gang", "c": true}, {"n": "bezoomny", "e": "mad; crazy", "p": "adj", "o": "Russian", "t": "bezumny (безумный) insane", "c": true}, {"n": "biblio", "e": "library", "p": "n", "o": "Russian", "t": "biblioteka (библиотека) library", "c": true}, {"n": "bitva", "e": "battle", "p": "n", "o": "Russian", "t": "bitva (битва) battle", "c": true}, {"n": "blub", "e": "to cry; weep", "p": "v", "o": "English slang", "t": "English slang 'blub'", "c": false}, {"n": "Bog", "e": "God", "p": "n", "o": "Russian", "t": "Bog (бог) God", "c": true}, {"n": "bolnoy", "e": "sick", "p": "adj", "o": "Russian", "t": "bolnoy (больной) sick", "c": true}, {"n": "bolshy", "e": "big; great", "p": "adj", "o": "Russian", "t": "bolshoy (большой) big", "c": true}, {"n": "boomaboom", "e": "thunder", "p": "n", "o": "Juvenile", "t": "onomatopoeic childish coinage", "c": true}, {"n": "boorjoyce", "e": "bourgeois", "p": "adj", "o": "Other", "t": "mispronounced 'bourgeois'", "c": true}, {"n": "bratchny", "e": "bastard", "p": "n", "o": "Russian", "t": "vnebrachny (внебрачный) illegitimate", "c": true}, {"n": "bratty", "e": "brother", "p": "n", "o": "Russian", "t": "brat (брат) brother", "c": true}, {"n": "britva", "e": "razor", "p": "n", "o": "Russian", "t": "britva (бритва) razor", "c": true}, {"n": "brooko", "e": "belly", "p": "n", "o": "Russian", "t": "bryukho (брюхо) abdomen", "c": true}, {"n": "brosay", "e": "to throw", "p": "v", "o": "Russian", "t": "brosat (бросать) to throw", "c": true}, {"n": "bruiseboys", "e": "police; security guards", "p": "n", "o": "Invented", "t": "coined slang", "c": false}, {"n": "bugatty", "e": "rich", "p": "adj", "o": "Russian", "t": "bogaty (богатый) wealthy", "c": true}, {"n": "cal", "e": "shit; feces", "p": "n", "o": "Russian", "t": "kal (кал) excrement", "c": true}, {"n": "cancer", "e": "cigarette", "p": "n", "o": "English slang", "t": "from 'cancer stick'", "c": true}, {"n": "cantora", "e": "office", "p": "n", "o": "Russian", "t": "kontora (контора) office", "c": true}, {"n": "carman", "e": "pocket", "p": "n", "o": "Russian", "t": "karman (карман) pocket", "c": true}, {"n": "chai", "e": "tea", "p": "n", "o": "Russian", "t": "chai (чай) tea", "c": true}, {"n": "charlie", "e": "chaplain; priest", "p": "n", "o": "Other", "t": "play on 'Charlie Chaplin'", "c": true}, {"n": "chasha", "e": "cup", "p": "n", "o": "Russian", "t": "chashka (чашка) cup", "c": true}, {"n": "chasso", "e": "guard", "p": "n", "o": "Russian", "t": "chasovoy (часовой) sentry", "c": true}, {"n": "cheena", "e": "woman", "p": "n", "o": "Russian", "t": "zhenshchina (женщина) woman", "c": false}, {"n": "cheest", "e": "to wash", "p": "v", "o": "Russian", "t": "chistit (чистить) to clean", "c": true}, {"n": "chelloveck", "e": "man; person; fellow", "p": "n", "o": "Russian", "t": "chelovek (человек) person", "c": true}, {"n": "chepooka", "e": "nonsense", "p": "n", "o": "Russian", "t": "chepukha (чепуха) nonsense", "c": true}, {"n": "choodessny", "e": "wonderful", "p": "adj", "o": "Russian", "t": "chudesny (чудесный) miraculous", "c": true}, {"n": "chumble", "e": "to mumble", "p": "v", "o": "Invented", "t": "blend of chatter + mumble", "c": true}, {"n": "clop", "e": "to knock", "p": "v", "o": "German", "t": "German klopfen / Dutch kloppen to knock", "c": true}, {"n": "cluve", "e": "beak", "p": "n", "o": "Russian", "t": "klyuv (клюв) beak", "c": true}, {"n": "collocol", "e": "bell", "p": "n", "o": "Russian", "t": "kolokol (колокол) bell", "c": true}, {"n": "crark", "e": "to yowl", "p": "v", "o": "Invented", "t": "coined, uncertain", "c": true}, {"n": "crast", "e": "to steal; rob", "p": "v", "o": "Russian", "t": "krast (красть) to steal", "c": true}, {"n": "creech", "e": "to scream; shout", "p": "v", "o": "Russian", "t": "krichat (кричать) to scream", "c": true}, {"n": "cutter", "e": "money", "p": "n", "o": "Invented", "t": "coined slang for money", "c": false}, {"n": "dama", "e": "lady", "p": "n", "o": "Russian", "t": "dama (дама) lady", "c": true}, {"n": "ded", "e": "old man", "p": "n", "o": "Russian", "t": "ded (дед) grandfather", "c": true}, {"n": "deng", "e": "money", "p": "n", "o": "Russian", "t": "dengi (деньги) money", "c": true}, {"n": "devotchka", "e": "girl", "p": "n", "o": "Russian", "t": "devochka (девочка) girl", "c": true}, {"n": "dobby", "e": "good", "p": "adj", "o": "Russian", "t": "dobry (добрый) good; kind", "c": true}, {"n": "domy", "e": "house", "p": "n", "o": "Russian", "t": "dom (дом) house", "c": true}, {"n": "dook", "e": "ghost; trace", "p": "n", "o": "Other", "t": "Romani 'dook' magic; Russian dukh spirit", "c": true}, {"n": "dorogoy", "e": "valuable; dear", "p": "adj", "o": "Russian", "t": "dorogoy (дорогой) dear; expensive", "c": true}, {"n": "dratsing", "e": "fighting", "p": "n", "o": "Russian", "t": "dratsya (драться) to fight", "c": true}, {"n": "drencrom", "e": "a drug", "p": "n", "o": "Invented", "t": "coined drug name", "c": true}, {"n": "droog", "e": "friend", "p": "n", "o": "Russian", "t": "drug (друг) friend", "c": true}, {"n": "dung", "e": "to defecate", "p": "v", "o": "English slang", "t": "from 'dung' animal excrement", "c": true}, {"n": "dva", "e": "two", "p": "num", "o": "Russian", "t": "dva (два) two", "c": true}, {"n": "eegra", "e": "game", "p": "n", "o": "Russian", "t": "igra (игра) game", "c": true}, {"n": "eemya", "e": "name", "p": "n", "o": "Russian", "t": "imya (имя) name", "c": true}, {"n": "eggiweg", "e": "egg", "p": "n", "o": "Juvenile", "t": "childish play on 'egg'", "c": true}, {"n": "em", "e": "mum; mother", "p": "n", "o": "Invented", "t": "initial 'M' of mother", "c": true}, {"n": "forella", "e": "old woman ('trout')", "p": "n", "o": "Russian", "t": "forel (форель) trout", "c": false}, {"n": "gazetta", "e": "newspaper", "p": "n", "o": "Russian", "t": "gazeta (газета) newspaper", "c": true}, {"n": "glazz", "e": "eye", "p": "n", "o": "Russian", "t": "glaz (глаз) eye", "c": true}, {"n": "glazzies", "e": "eyes", "p": "n", "o": "Russian", "t": "glaz (глаз) eye, plural", "c": false}, {"n": "gloopy", "e": "stupid", "p": "adj", "o": "Russian", "t": "glupy (глупый) foolish", "c": true}, {"n": "godman", "e": "priest", "p": "n", "o": "Invented", "t": "'man of God'", "c": false}, {"n": "golly", "e": "unit of money", "p": "n", "o": "Invented", "t": "rhymes on 'lolly' (money)", "c": false}, {"n": "goloss", "e": "voice", "p": "n", "o": "Russian", "t": "golos (голос) voice", "c": true}, {"n": "goober", "e": "lip", "p": "n", "o": "Russian", "t": "guba (губа) lip", "c": true}, {"n": "gooly", "e": "to walk", "p": "v", "o": "Russian", "t": "gulyat (гулять) to stroll", "c": true}, {"n": "gorlo", "e": "throat", "p": "n", "o": "Russian", "t": "gorlo (горло) throat", "c": true}, {"n": "govoreet", "e": "to speak; talk", "p": "v", "o": "Russian", "t": "govorit (говорить) to speak", "c": true}, {"n": "grazhny", "e": "dirty", "p": "adj", "o": "Russian", "t": "gryazny (грязный) dirty", "c": true}, {"n": "grazzy", "e": "soiled", "p": "adj", "o": "Russian", "t": "gryazny (грязный) dirty", "c": false}, {"n": "gromky", "e": "loud", "p": "adj", "o": "Russian", "t": "gromky (громкий) loud", "c": true}, {"n": "groody", "e": "breast", "p": "n", "o": "Russian", "t": "grud (грудь) breast", "c": true}, {"n": "gruppa", "e": "group", "p": "n", "o": "Russian", "t": "gruppa (группа) group", "c": true}, {"n": "guff", "e": "to laugh", "p": "v", "o": "English slang", "t": "short for 'guffaw'", "c": false}, {"n": "gulliver", "e": "head", "p": "n", "o": "Russian", "t": "golova (голова) head", "c": true}, {"n": "guttiwuts", "e": "guts", "p": "n", "o": "Juvenile", "t": "childish play on 'guts'", "c": true}, {"n": "hen-korm", "e": "chickenfeed; trifle", "p": "n", "o": "Invented", "t": "'hen-corn'; Russian korm feed", "c": true}, {"n": "horrorshow", "e": "good; well", "p": "adj", "o": "Russian", "t": "khorosho (хорошо) good; fine", "c": false}, {"n": "in-out in-out", "e": "sexual intercourse", "p": "n", "o": "Invented", "t": "coined euphemism", "c": true}, {"n": "interessovat", "e": "to interest", "p": "v", "o": "Russian", "t": "interesovat (интересовать) to interest", "c": true}, {"n": "itty", "e": "to go", "p": "v", "o": "Russian", "t": "idti (идти) to go", "c": true}, {"n": "jammiwam", "e": "jam; jelly", "p": "n", "o": "Juvenile", "t": "childish play on 'jam'", "c": true}, {"n": "jeezny", "e": "life", "p": "n", "o": "Russian", "t": "zhizn (жизнь) life", "c": true}, {"n": "kartoffel", "e": "potato", "p": "n", "o": "German", "t": "German Kartoffel / Russian kartofel potato", "c": true}, {"n": "keeshkas", "e": "guts; intestines", "p": "n", "o": "Russian", "t": "kishka (кишка) intestine", "c": false}, {"n": "kleb", "e": "bread", "p": "n", "o": "Russian", "t": "khleb (хлеб) bread", "c": true}, {"n": "klootch", "e": "key", "p": "n", "o": "Russian", "t": "klyuch (ключ) key", "c": true}, {"n": "knopka", "e": "button", "p": "n", "o": "Russian", "t": "knopka (кнопка) button", "c": true}, {"n": "kopat", "e": "to dig; appreciate", "p": "v", "o": "Russian", "t": "kopat (копать) to dig", "c": true}, {"n": "korova", "e": "cow", "p": "n", "o": "Russian", "t": "korova (корова) cow", "c": true}, {"n": "koshka", "e": "cat", "p": "n", "o": "Russian", "t": "koshka (кошка) cat", "c": true}, {"n": "kot", "e": "tomcat", "p": "n", "o": "Russian", "t": "kot (кот) tomcat", "c": false}, {"n": "krovvy", "e": "blood", "p": "n", "o": "Russian", "t": "krov (кровь) blood", "c": true}, {"n": "kupet", "e": "to buy", "p": "v", "o": "Russian", "t": "kupit (купить) to buy", "c": true}, {"n": "lapa", "e": "paw", "p": "n", "o": "Russian", "t": "lapa (лапа) paw", "c": true}, {"n": "lewdies", "e": "people", "p": "n", "o": "Russian", "t": "lyudi (люди) people", "c": true}, {"n": "lighter", "e": "crone; old woman", "p": "n", "o": "Invented", "t": "poss. from 'blighter'", "c": false}, {"n": "litso", "e": "face", "p": "n", "o": "Russian", "t": "litso (лицо) face", "c": true}, {"n": "lomtick", "e": "piece; bit", "p": "n", "o": "Russian", "t": "lomtik (ломтик) a slice", "c": true}, {"n": "loveted", "e": "caught", "p": "v", "o": "Russian", "t": "lovit (ловить) to catch", "c": true}, {"n": "lubbilubbing", "e": "making love", "p": "v", "o": "Russian", "t": "lyublyu (люблю) I love", "c": true}, {"n": "luscious glory", "e": "hair", "p": "n", "o": "Invented", "t": "from 'crowning glory'", "c": false}, {"n": "malchick", "e": "boy", "p": "n", "o": "Russian", "t": "malchik (мальчик) boy", "c": true}, {"n": "malenky", "e": "little; tiny", "p": "adj", "o": "Russian", "t": "malenky (маленький) small", "c": true}, {"n": "maslo", "e": "butter", "p": "n", "o": "Russian", "t": "maslo (масло) butter", "c": true}, {"n": "merzky", "e": "filthy", "p": "adj", "o": "Russian", "t": "merzky (мерзкий) vile", "c": true}, {"n": "messel", "e": "thought; fancy", "p": "n", "o": "Russian", "t": "mysl (мысль) thought", "c": true}, {"n": "mesto", "e": "place", "p": "n", "o": "Russian", "t": "mesto (место) place", "c": true}, {"n": "millicent", "e": "policeman", "p": "n", "o": "Russian", "t": "militsiya (милиция) police", "c": false}, {"n": "minoota", "e": "minute", "p": "n", "o": "Russian", "t": "minuta (минута) minute", "c": true}, {"n": "molodoy", "e": "young", "p": "adj", "o": "Russian", "t": "molodoy (молодой) young", "c": true}, {"n": "moloko", "e": "milk", "p": "n", "o": "Russian", "t": "moloko (молоко) milk", "c": true}, {"n": "moodge", "e": "man; husband", "p": "n", "o": "Russian", "t": "muzh (муж) husband", "c": false}, {"n": "morder", "e": "snout; nose", "p": "n", "o": "Russian", "t": "morda (морда) snout", "c": true}, {"n": "mounch", "e": "snack", "p": "n", "o": "Invented", "t": "from 'munch'", "c": true}, {"n": "mozg", "e": "brain", "p": "n", "o": "Russian", "t": "mozg (мозг) brain", "c": true}, {"n": "nachinat", "e": "to begin", "p": "v", "o": "Russian", "t": "nachinat (начинать) to begin", "c": true}, {"n": "nadmenny", "e": "arrogant", "p": "adj", "o": "Russian", "t": "nadmenny (надменный) arrogant", "c": true}, {"n": "nadsat", "e": "teenage", "p": "adj", "o": "Russian", "t": "-nadsat (-надцать) the '-teen' suffix", "c": true}, {"n": "nagoy", "e": "naked", "p": "adj", "o": "Russian", "t": "nagoy (нагой) naked", "c": true}, {"n": "nazz", "e": "fool", "p": "n", "o": "Russian", "t": "nazad (назад) backwards", "c": false}, {"n": "neezhnies", "e": "underpants", "p": "n", "o": "Russian", "t": "nizhneye belyo (нижнее бельё) underwear", "c": true}, {"n": "nochy", "e": "night", "p": "n", "o": "Russian", "t": "noch (ночь) night", "c": true}, {"n": "noga", "e": "foot; leg", "p": "n", "o": "Russian", "t": "noga (нога) leg", "c": true}, {"n": "nozh", "e": "knife", "p": "n", "o": "Russian", "t": "nozh (нож) knife", "c": true}, {"n": "nuking", "e": "smelling", "p": "v", "o": "Russian", "t": "nyukhat (нюхать) to smell", "c": true}, {"n": "oddy-knocky", "e": "lonesome; on one's own", "p": "adj", "o": "Russian", "t": "odinoky (одинокий) lonely", "c": true}, {"n": "odin", "e": "one", "p": "num", "o": "Russian", "t": "odin (один) one", "c": true}, {"n": "okno", "e": "window", "p": "n", "o": "Russian", "t": "okno (окно) window", "c": true}, {"n": "oobivat", "e": "to kill", "p": "v", "o": "Russian", "t": "ubivat (убивать) to kill", "c": true}, {"n": "ookadeet", "e": "to leave", "p": "v", "o": "Russian", "t": "ukhodit (уходить) to leave", "c": true}, {"n": "ooko", "e": "ear", "p": "n", "o": "Russian", "t": "ukho (ухо) ear", "c": true}, {"n": "oomny", "e": "brainy; clever", "p": "adj", "o": "Russian", "t": "umny (умный) clever", "c": true}, {"n": "oozhassny", "e": "terrible", "p": "adj", "o": "Russian", "t": "uzhasny (ужасный) terrible", "c": true}, {"n": "oozy", "e": "chain", "p": "n", "o": "Russian", "t": "uzy (узы) bonds; shackles", "c": true}, {"n": "orange", "e": "man", "p": "n", "o": "Other", "t": "Malay 'orang' man", "c": false}, {"n": "osoosh", "e": "to wipe; dry", "p": "v", "o": "Russian", "t": "osushat (осушать) to dry", "c": true}, {"n": "otchkies", "e": "eyeglasses", "p": "n", "o": "Russian", "t": "ochki (очки) glasses", "c": true}, {"n": "pan-handle", "e": "erection", "p": "n", "o": "Invented", "t": "coined slang", "c": true}, {"n": "pee and em", "e": "parents", "p": "n", "o": "Invented", "t": "'P and M' = papa and mama", "c": true}, {"n": "peet", "e": "to drink", "p": "v", "o": "Russian", "t": "pit (пить) to drink", "c": true}, {"n": "pishcha", "e": "food", "p": "n", "o": "Russian", "t": "pishcha (пища) food", "c": true}, {"n": "platch", "e": "to cry", "p": "v", "o": "Russian", "t": "plach (плач) weeping", "c": false}, {"n": "platties", "e": "clothes", "p": "n", "o": "Russian", "t": "platye (платье) clothes", "c": true}, {"n": "plenny", "e": "prisoner", "p": "n", "o": "Russian", "t": "plenny (пленный) captive", "c": true}, {"n": "plesk", "e": "splash", "p": "n", "o": "Russian", "t": "plesk (плеск) splash", "c": true}, {"n": "pletcho", "e": "shoulder", "p": "n", "o": "Russian", "t": "plecho (плечо) shoulder", "c": true}, {"n": "plott", "e": "body", "p": "n", "o": "Russian", "t": "plot (плоть) flesh", "c": true}, {"n": "podooshka", "e": "pillow", "p": "n", "o": "Russian", "t": "podushka (подушка) pillow", "c": true}, {"n": "pol", "e": "sex", "p": "n", "o": "Russian", "t": "pol (пол) sex; gender", "c": true}, {"n": "polezny", "e": "useful", "p": "adj", "o": "Russian", "t": "polezny (полезный) useful", "c": true}, {"n": "polyclef", "e": "skeleton key", "p": "n", "o": "French", "t": "Eng 'poly-' many + Fr clef key", "c": true}, {"n": "pony", "e": "to understand", "p": "v", "o": "Russian", "t": "ponimat (понимать) to understand", "c": true}, {"n": "poogly", "e": "frightened", "p": "adj", "o": "Russian", "t": "puglivy (пугливый) fearful", "c": true}, {"n": "pooshka", "e": "gun; cannon", "p": "n", "o": "Russian", "t": "pushka (пушка) cannon", "c": true}, {"n": "prestoopnik", "e": "criminal", "p": "n", "o": "Russian", "t": "prestupnik (преступник) criminal", "c": true}, {"n": "pretty polly", "e": "money", "p": "n", "o": "English slang", "t": "rhyming on 'lolly' (money)", "c": false}, {"n": "privodeet", "e": "to lead somewhere", "p": "v", "o": "Russian", "t": "privodit (приводить) to lead", "c": true}, {"n": "prod", "e": "to produce", "p": "v", "o": "Invented", "t": "short for 'produce'", "c": true}, {"n": "ptitsa", "e": "girl ('chick')", "p": "n", "o": "Russian", "t": "ptitsa (птица) bird", "c": false}, {"n": "pyahnitsa", "e": "drunk", "p": "n", "o": "Russian", "t": "pyanitsa (пьяница) drunkard", "c": true}, {"n": "rabbit", "e": "work; job", "p": "n", "o": "Russian", "t": "rabota (работа) work", "c": true}, {"n": "radosty", "e": "joy", "p": "n", "o": "Russian", "t": "radost (радость) joy", "c": true}, {"n": "raskazz", "e": "story", "p": "n", "o": "Russian", "t": "rasskaz (рассказ) story", "c": true}, {"n": "rassoodock", "e": "mind", "p": "n", "o": "Russian", "t": "rassudok (рассудок) reason; sense", "c": true}, {"n": "raz", "e": "time; occasion", "p": "n", "o": "Russian", "t": "raz (раз) occasion", "c": true}, {"n": "razdraz", "e": "upset", "p": "adj", "o": "Russian", "t": "razdrazhat (раздражать) to irritate", "c": true}, {"n": "razrez", "e": "to rip", "p": "v", "o": "Russian", "t": "razrez (разрез) cut", "c": true}, {"n": "rooker", "e": "hand; arm", "p": "n", "o": "Russian", "t": "ruka (рука) hand", "c": true}, {"n": "rot", "e": "mouth", "p": "n", "o": "Russian", "t": "rot (рот) mouth", "c": true}, {"n": "rozz", "e": "policeman", "p": "n", "o": "English slang", "t": "UK slang 'rozzer' policeman", "c": true}, {"n": "sabog", "e": "shoe", "p": "n", "o": "French", "t": "French 'sabot' clog", "c": true}, {"n": "sakar", "e": "sugar", "p": "n", "o": "Russian", "t": "sakhar (сахар) sugar", "c": true}, {"n": "sammy", "e": "generous", "p": "adj", "o": "English slang", "t": "poss. 'good Samaritan'", "c": true}, {"n": "sarky", "e": "sarcastic", "p": "adj", "o": "English slang", "t": "short for 'sarcastic'", "c": true}, {"n": "scoteena", "e": "cow; beast", "p": "n", "o": "Russian", "t": "skotina (скотина) brute; cattle", "c": true}, {"n": "shaika", "e": "gang", "p": "n", "o": "Russian", "t": "shaika (шайка) band of thieves", "c": false}, {"n": "sharp", "e": "female", "p": "n", "o": "English slang", "t": "poss. rhyming slang 'sharp and blunt'", "c": false}, {"n": "sharries", "e": "buttocks", "p": "n", "o": "Russian", "t": "shary (шары) balls; globes", "c": true}, {"n": "shest", "e": "pole; barrier", "p": "n", "o": "Russian", "t": "shest (шест) pole", "c": true}, {"n": "shilarny", "e": "concern", "p": "n", "o": "Invented", "t": "coined, uncertain", "c": true}, {"n": "shive", "e": "slice; cut", "p": "n", "o": "English slang", "t": "'shiv' a knife", "c": true}, {"n": "shiyah", "e": "neck", "p": "n", "o": "Russian", "t": "sheya (шея) neck", "c": true}, {"n": "shlaga", "e": "club; cudgel", "p": "n", "o": "German", "t": "German Schläger bat; club", "c": true}, {"n": "shlapa", "e": "hat", "p": "n", "o": "Russian", "t": "shlyapa (шляпа) hat", "c": true}, {"n": "shlem", "e": "helmet", "p": "n", "o": "Russian", "t": "shlem (шлем) helmet", "c": true}, {"n": "shoom", "e": "noise", "p": "n", "o": "Russian", "t": "shum (шум) noise", "c": true}, {"n": "shoot", "e": "fool", "p": "n", "o": "Russian", "t": "shut (шут) jester; fool", "c": false}, {"n": "sinny", "e": "cinema", "p": "n", "o": "Invented", "t": "from 'cinema'", "c": true}, {"n": "skazat", "e": "to say", "p": "v", "o": "Russian", "t": "skazat (сказать) to say", "c": true}, {"n": "skolliwoll", "e": "school", "p": "n", "o": "Juvenile", "t": "childish play; Russian shkola school", "c": true}, {"n": "skorry", "e": "quick; quickly", "p": "adj", "o": "Russian", "t": "skory (скорый) fast", "c": true}, {"n": "skriking", "e": "scratching", "p": "v", "o": "Invented", "t": "poss. strike + scratch", "c": true}, {"n": "skvat", "e": "to grab", "p": "v", "o": "Russian", "t": "skhvatit (схватить) to grab", "c": true}, {"n": "sladky", "e": "sweet", "p": "adj", "o": "Russian", "t": "sladky (сладкий) sweet", "c": true}, {"n": "sloochat", "e": "to happen", "p": "v", "o": "Russian", "t": "sluchatsya (случаться) to happen", "c": true}, {"n": "slooshy", "e": "to hear; listen", "p": "v", "o": "Russian", "t": "slushat (слушать) to listen", "c": true}, {"n": "slovo", "e": "word", "p": "n", "o": "Russian", "t": "slovo (слово) word", "c": true}, {"n": "smeck", "e": "to laugh", "p": "v", "o": "Russian", "t": "smekh (смех) laughter", "c": true}, {"n": "smot", "e": "to look", "p": "v", "o": "Russian", "t": "smotret (смотреть) to look", "c": true}, {"n": "sneety", "e": "dream", "p": "n", "o": "Russian", "t": "snitsya (сниться) to dream", "c": true}, {"n": "snoutie", "e": "tobacco", "p": "n", "o": "English slang", "t": "UK slang 'snout' tobacco", "c": true}, {"n": "snuff it", "e": "to die", "p": "v", "o": "English slang", "t": "English slang 'snuff it'", "c": true}, {"n": "sobirat", "e": "to pick up", "p": "v", "o": "Russian", "t": "sobirat (собирать) to gather", "c": true}, {"n": "sod", "e": "to fornicate; wretch", "p": "v", "o": "English slang", "t": "from 'sodomite'", "c": true}, {"n": "soomka", "e": "unattractive woman; 'bag'", "p": "n", "o": "Russian", "t": "sumka (сумка) bag", "c": true}, {"n": "soviet", "e": "advice; order", "p": "n", "o": "Russian", "t": "sovet (совет) advice; council", "c": true}, {"n": "spat", "e": "to sleep", "p": "v", "o": "Russian", "t": "spat (спать) to sleep", "c": true}, {"n": "spatchka", "e": "sleep", "p": "n", "o": "Russian", "t": "spat (спать) to sleep", "c": true}, {"n": "spoogy", "e": "terrified", "p": "adj", "o": "Russian", "t": "ispugannyy (испуганный) scared", "c": true}, {"n": "staja", "e": "state jail; prison", "p": "n", "o": "Invented", "t": "'State Jail'", "c": true}, {"n": "starry", "e": "old; ancient", "p": "adj", "o": "Russian", "t": "stary (старый) old", "c": true}, {"n": "strack", "e": "horror", "p": "n", "o": "Russian", "t": "strakh (страх) fear", "c": true}, {"n": "synthemesc", "e": "a drug", "p": "n", "o": "Invented", "t": "'synthetic mescaline'", "c": true}, {"n": "tally", "e": "waist", "p": "n", "o": "Russian", "t": "taliya (талия) waist", "c": true}, {"n": "tashtook", "e": "handkerchief", "p": "n", "o": "German", "t": "German Taschentuch handkerchief", "c": true}, {"n": "tass", "e": "cup", "p": "n", "o": "French", "t": "French tasse / German Tasse cup", "c": false}, {"n": "tolchock", "e": "to hit; a blow", "p": "v", "o": "Russian", "t": "tolchok (толчок) a shove", "c": true}, {"n": "toofles", "e": "slippers", "p": "n", "o": "Russian", "t": "tufli (туфли) shoes", "c": true}, {"n": "tree", "e": "three", "p": "num", "o": "Russian", "t": "tri (три) three", "c": true}, {"n": "vareet", "e": "to cook up", "p": "v", "o": "Russian", "t": "varit (варить) to cook", "c": true}, {"n": "vaysay", "e": "washroom; toilet", "p": "n", "o": "French", "t": "French pronunciation of W.C.", "c": true}, {"n": "veck", "e": "guy; man", "p": "n", "o": "Russian", "t": "short for chelovek (человек) person", "c": true}, {"n": "vellocet", "e": "a drug", "p": "n", "o": "Invented", "t": "coined drug name", "c": true}, {"n": "veshch", "e": "thing", "p": "n", "o": "Russian", "t": "veshch (вещь) thing", "c": true}, {"n": "viddy", "e": "to see; look", "p": "v", "o": "Russian", "t": "videt (видеть) to see", "c": true}, {"n": "voloss", "e": "hair", "p": "n", "o": "Russian", "t": "volos (волос) hair", "c": true}, {"n": "von", "e": "a smell; stink", "p": "n", "o": "Russian", "t": "von (вонь) stink", "c": true}, {"n": "vred", "e": "to harm", "p": "v", "o": "Russian", "t": "vred (вред) harm", "c": true}, {"n": "warble", "e": "song", "p": "n", "o": "English", "t": "English 'warble' bird's song", "c": true}, {"n": "yahma", "e": "hole", "p": "n", "o": "Russian", "t": "yama (яма) hole; pit", "c": true}, {"n": "yahzick", "e": "tongue", "p": "n", "o": "Russian", "t": "yazyk (язык) tongue", "c": true}, {"n": "yarbles", "e": "testicles; balls", "p": "n", "o": "Russian", "t": "yabloki (яблоки) apples", "c": true}, {"n": "yeckate", "e": "to drive", "p": "v", "o": "Russian", "t": "yekhat (ехать) to ride; drive", "c": true}, {"n": "zammechat", "e": "remarkable", "p": "adj", "o": "Russian", "t": "zamechatelno (замечательно) wonderful", "c": true}, {"n": "zasnoot", "e": "to sleep", "p": "v", "o": "Russian", "t": "zasnut (заснуть) to fall asleep", "c": true}, {"n": "zheena", "e": "wife", "p": "n", "o": "Russian", "t": "zhena (жена) wife", "c": true}, {"n": "zoobies", "e": "teeth", "p": "n", "o": "Russian", "t": "zuby (зубы) teeth", "c": true}, {"n": "zvonock", "e": "doorbell", "p": "n", "o": "Russian", "t": "zvonok (звонок) doorbell", "c": true}, {"n": "zvook", "e": "sound", "p": "n", "o": "Russian", "t": "zvuk (звук) sound", "c": true}];
+
+/* ---------- build maps ---------- */
+const stripTo = s => s.replace(/^to\s+/i,'').trim();
+const primary = e => stripTo(e.split(';')[0].trim());
+function engKey(e){
+  let k = e.split(';')[0].trim().toLowerCase();
+  k = k.replace(/\([^)]*\)/g,'').trim();
+  return stripTo(k);
+}
+const N2E = new Map();          // nadsat(lower) -> english primary
+const ROW = new Map();          // nadsat(lower) -> full row (for tips)
+for(const r of LEX){ const k=r.n.toLowerCase(); if(!N2E.has(k)){N2E.set(k,primary(r.e));ROW.set(k,r);} }
+const E2N = new Map();          // english word -> nadsat (canonical, single word)
+for(const r of LEX){ if(!r.c) continue; const k=engKey(r.e); if(!k||k.includes(' '))continue; if(!E2N.has(k))E2N.set(k,r.n); }
+const E2N_PH=[], N2E_PH=[];
+for(const r of LEX){
+  if(r.c){ const k=engKey(r.e); if(k.includes(' ')) E2N_PH.push([k,r.n]); }
+  const nk=r.n.toLowerCase(); if(nk.includes(' ')) N2E_PH.push([nk,primary(r.e)]);
+}
+E2N_PH.sort((a,b)=>b[0].length-a[0].length);
+N2E_PH.sort((a,b)=>b[0].length-a[0].length);
+
+// every nadsat option per english key (canonical first), for the Shuffle mode
+const E2N_ALL = new Map();
+for(const want of [true,false]) for(const r of LEX){
+  if(r.c!==want) continue; const k=engKey(r.e); if(!k||k.includes(' '))continue;
+  if(!E2N_ALL.has(k)) E2N_ALL.set(k,[]);
+  const a=E2N_ALL.get(k); if(!a.includes(r.n)) a.push(r.n);
+}
+// childish coinages per english key, for the Juvenile mode
+const JUV = new Map();
+for(const r of LEX){ if(r.o!=='Juvenile')continue; const k=engKey(r.e); if(!k||k.includes(' '))continue; if(!JUV.has(k))JUV.set(k,r.n); }
+
+const state = {dir:'en2nad', juv:false, shuf:false, salt:1};
+
+// deterministic per-(word,position,salt) pick so output is stable while typing
+function hpick(s,idx){
+  let h=2166136261>>>0; const str=s+'|'+idx+'|'+state.salt;
+  for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
+  return h>>>0;
+}
+function hasEng(k){ return E2N.has(k) || (state.juv&&JUV.has(k)) || (state.shuf&&E2N_ALL.has(k)); }
+function nadFor(k,idx){
+  if(state.juv && JUV.has(k)) return JUV.get(k);
+  if(state.shuf && E2N_ALL.has(k)){ const a=E2N_ALL.get(k); return a[hpick(k,idx)%a.length]; }
+  return E2N.get(k) || (E2N_ALL.has(k)?E2N_ALL.get(k)[0]:k);
+}
+
+const EN_IRREG={drank:"drink",drunk:"drink",saw:"see",seen:"see",men:"man",women:"woman",
+  children:"child",feet:"foot",teeth:"tooth",people:"person",knew:"know",went:"go",said:"say",
+  took:"take",ran:"run",came:"come",gave:"give",got:"get",made:"make",told:"tell",heard:"hear",
+  fought:"fight",thought:"think",caught:"catch",bought:"buy",brought:"bring"};
+const EN_PLURAL={man:"men",woman:"women",child:"children",foot:"feet",tooth:"teeth",person:"people"};
+
+/* ---------- engine ---------- */
+function lookupWord(w, dir, idx){
+  // returns {word, root} or null. dir: 'en2nad' | 'nad2eng'
+  if(dir==='en2nad'){
+    if(EN_IRREG[w] && hasEng(EN_IRREG[w])) return {word:nadFor(EN_IRREG[w],idx), root:EN_IRREG[w]};
+    if(hasEng(w)) return {word:nadFor(w,idx), root:w};
+    const s1=w.slice(0,-1), s3=w.slice(0,-3), s2=w.slice(0,-2);
+    if(w.length>2 && w.endsWith('s') && hasEng(s1)) return {word:nadFor(s1,idx)+'s', root:s1};
+    if(w.length>4 && w.endsWith('ing') && hasEng(s3)) return {word:nadFor(s3,idx)+'ing', root:s3};
+    if(w.length>3 && w.endsWith('ed') && hasEng(s2)) return {word:nadFor(s2,idx)+'ed', root:s2};
+    return null;
+  }
+  // nad2eng
+  if(EN_IRREG[w] && N2E.has(EN_IRREG[w])) {/* not applicable */}
+  if(N2E.has(w)) return {word:N2E.get(w), root:w};
+  if(w.length>2 && w.endsWith('s') && N2E.has(w.slice(0,-1))){
+    const base=N2E.get(w.slice(0,-1));
+    return {word:(EN_PLURAL[base]||base+'s'), root:w.slice(0,-1)};
+  }
+  if(w.length>4 && w.endsWith('ing') && N2E.has(w.slice(0,-3)))
+    return {word:N2E.get(w.slice(0,-3))+'ing', root:w.slice(0,-3)};
+  if(w.length>3 && w.endsWith('ed') && N2E.has(w.slice(0,-2)))
+    return {word:N2E.get(w.slice(0,-2))+'ed', root:w.slice(0,-2)};
+  return null;
+}
+function matchCase(sample, out){
+  if(sample.length>1 && sample===sample.toUpperCase() && sample!==sample.toLowerCase())
+    return out.toUpperCase();
+  if(sample[0] && sample[0]===sample[0].toUpperCase() && sample[0]!==sample[0].toLowerCase())
+    return out.charAt(0).toUpperCase()+out.slice(1);
+  return out;
+}
+const esc = s => s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+
+function tip(dir, root, outWord){
+  // root is a nadsat key in nad2eng, an english word in en2nad
+  let r;
+  if(dir==='en2nad'){ r=ROW.get(outWord.toLowerCase().replace(/(s|ing|ed)$/,'')) || ROW.get(outWord.toLowerCase()); }
+  else { r=ROW.get(root.toLowerCase()); }
+  if(!r) return '';
+  return (dir==='en2nad' ? '"'+root+'" \u2192 '+r.n : r.n+' \u2192 "'+primary(r.e)+'"') + '  \u00b7  '+r.t;
+}
+
+function translate(text, dir){
+  let hits=0, words=0;
+  const PH = dir==='en2nad' ? E2N_PH : N2E_PH;
+  // phrase pass -> placeholders
+  const slots=[];
+  let work=text;
+  for(const [ph,tr] of PH){
+    const re=new RegExp('(?<![\\p{L}])'+reEsc(ph)+'(?![\\p{L}])','giu');
+    work=work.replace(re,m=>{const id=slots.length;slots.push({tr,from:m});return '\u0001'+id+'\u0001';});
+  }
+  const parts=work.split(/(\s+)/);
+  let idx=0;
+  const html=parts.map(tok=>{
+    if(/^\s+$/.test(tok)||tok==='') return esc(tok);
+    const ph=tok.match(/^([^\u0001]*)\u0001(\d+)\u0001([^\u0001]*)$/);
+    if(ph){ const s=slots[+ph[2]]; hits++; words++; idx++;
+      const out=matchCase(s.from.trim(),s.tr);
+      return esc(ph[1])+'<span class="hit" tabindex="0" data-tip="'+esc('\u201c'+s.from.trim()+'\u201d \u2192 '+s.tr)+'">'+esc(out)+'</span>'+esc(ph[3]);
+    }
+    const m=tok.match(/^([^\p{L}]*)(\p{L}[\p{L}'\-]*)([^\p{L}]*)$/u);
+    if(!m) return esc(tok);
+    const [,pre,core,post]=m; words++; idx++;
+    const res=lookupWord(core.toLowerCase(),dir,idx);
+    if(res){ hits++;
+      const out=matchCase(core,res.word);
+      return esc(pre)+'<span class="hit" tabindex="0" data-tip="'+esc(tip(dir,res.root,res.word))+'">'+esc(out)+'</span>'+esc(post);
+    }
+    return esc(pre)+'<span class="pass">'+esc(core)+'</span>'+esc(post);
+  }).join('');
+  return {html, words, hits, pass:words-hits};
+}
+
+/* ---------- wiring ---------- */
+let dir='en2nad';
+const src=document.getElementById('src'), out=document.getElementById('out');
+const gearbox=document.getElementById('gearbox'), gear=gearbox.querySelector('svg');
+const rW=document.getElementById('r-words'),rH=document.getElementById('r-hits'),rP=document.getElementById('r-pass');
+const labSrc=document.getElementById('lab-src'),labOut=document.getElementById('lab-out');
+const dEN=document.getElementById('d-en'),dNA=document.getElementById('d-na');
+
+const SEED={en2nad:"My friends drink milk and look at the girls before the fight.",
+            nad2eng:"The malchicks had pretty polly and krovvy on their rookers, O my brothers."};
+
+function render(){
+  const text=src.value;
+  if(!text.trim()){
+    out.innerHTML='<span class="placeholder">\u2026'+(dir==='en2nad'?'your droog-speak appears here.':'your English appears here.')+'</span>';
+    rW.textContent='0';rH.textContent='0';rP.textContent='0';return;
+  }
+  const r=translate(text,dir);
+  out.innerHTML=r.html;
+  rW.textContent=r.words;rH.textContent=r.hits;rP.textContent=r.pass;
+  gear.classList.add('spin');gearbox.classList.add('tick');
+  clearTimeout(render._t);render._t=setTimeout(()=>{gear.classList.remove('spin');gearbox.classList.remove('tick');},650);
+  clearTimeout(render._h);render._h=setTimeout(updateHash,250);
+}
+function setDir(d){
+  dir=d; state.dir=d;
+  dEN.setAttribute('aria-pressed',d==='en2nad');
+  dNA.setAttribute('aria-pressed',d==='nad2eng');
+  labSrc.innerHTML='You speak &mdash; '+(d==='en2nad'?'English':'Nadsat');
+  labOut.innerHTML='The machine says &mdash; '+(d==='en2nad'?'Nadsat':'English');
+  src.placeholder=d==='en2nad'?'Write some English here\u2026':'Write some Nadsat here\u2026';
+  render();
+}
+dEN.onclick=()=>setDir('en2nad');
+dNA.onclick=()=>setDir('nad2eng');
+document.getElementById('swap').onclick=()=>{
+  const cur=out.textContent.trim();
+  setDir(dir==='en2nad'?'nad2eng':'en2nad');
+  if(cur && !cur.startsWith('\u2026')) src.value=cur;
+  render();
+};
+src.addEventListener('input',render);
+
+/* toggles */
+const tJuv=document.getElementById('t-juv'), tShuf=document.getElementById('t-shuf'), reroll=document.getElementById('reroll');
+function syncToggles(){
+  tJuv.setAttribute('aria-pressed',state.juv);
+  tShuf.setAttribute('aria-pressed',state.shuf);
+  reroll.hidden=!state.shuf;
+}
+tJuv.onclick=()=>{state.juv=!state.juv;syncToggles();render();};
+tShuf.onclick=()=>{state.shuf=!state.shuf;syncToggles();render();};
+reroll.onclick=()=>{state.salt++;render();toast('Re-rolled the synonyms');};
+
+/* toast + clipboard */
+const toastEl=document.getElementById('toast');
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');
+  clearTimeout(toast._t);toast._t=setTimeout(()=>toastEl.classList.remove('show'),1800);}
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); return true; }
+  catch(e){
+    try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();return ok;}
+    catch(_){return false;}
+  }
+}
+const copyBtn=document.getElementById('copy');
+copyBtn.onclick=async()=>{
+  const t=out.textContent.trim();
+  if(!t||t.startsWith('\u2026')){toast('Nothing to copy yet');return;}
+  const ok=await copyText(t);
+  copyBtn.textContent=ok?'Copied':'Press \u2318C';copyBtn.classList.toggle('ok',ok);
+  toast(ok?'Result copied':'Couldn\u2019t reach the clipboard');
+  setTimeout(()=>{copyBtn.textContent='Copy';copyBtn.classList.remove('ok');},1600);
+};
+
+/* shareable link: encode state in the URL hash */
+function updateHash(){
+  try{
+    const p=new URLSearchParams();
+    p.set('d',state.dir); if(state.juv)p.set('j','1'); if(state.shuf){p.set('s','1');p.set('r',state.salt);}
+    if(src.value.trim())p.set('t',src.value);
+    history.replaceState(null,'','#'+p.toString());
+  }catch(e){/* sandboxed: skip */}
+}
+document.getElementById('share').onclick=async()=>{
+  updateHash();
+  const ok=await copyText(location.href);
+  toast(ok?'Link copied \u2014 it restores this exact translation':'Couldn\u2019t copy; the link is in your address bar');
+};
+function restoreHash(){
+  if(!location.hash||location.hash.length<2)return false;
+  const p=new URLSearchParams(location.hash.slice(1));
+  if(p.get('j')==='1')state.juv=true;
+  if(p.get('s')==='1')state.shuf=true;
+  if(p.get('r'))state.salt=+p.get('r')||1;
+  const d=p.get('d')==='nad2eng'?'nad2eng':'en2nad';
+  syncToggles();
+  setDir(d);                 // also builds examples + renders
+  if(p.has('t')){src.value=p.get('t');render();}
+  return true;
+}
+
+/* examples */
+const EX={en2nad:["My friends drink milk.","The boys are fighting and drinking.","Give me money and a knife.","I am looking at the old woman."],
+          nad2eng:["The malchick had a nozh.","My droogs were peeting moloko.","He viddied the devotchka and her glazzies.","Appy polly loggy, O my brothers."]};
+const exWrap=document.getElementById('examples');
+function buildExamples(){
+  [...exWrap.querySelectorAll('.chip')].forEach(c=>c.remove());
+  EX[dir].forEach(t=>{const b=document.createElement('button');b.className='chip';b.textContent=t;
+    b.onclick=()=>{src.value=t;render();src.focus();};exWrap.appendChild(b);});
+}
+const _setDir=setDir; setDir=function(d){_setDir(d);buildExamples();};
+
+/* ---------- dictionary ---------- */
+const POS={n:'noun',v:'verb',adj:'adj.',num:'num.'};
+const entries=document.getElementById('entries'),nohits=document.getElementById('nohits');
+const q=document.getElementById('q'),filters=document.getElementById('filters');
+let activeOrigin='All';
+const origins=['All',...[...new Set(LEX.map(r=>r.o))].sort()];
+origins.forEach(o=>{const b=document.createElement('button');b.textContent=o;
+  b.setAttribute('aria-pressed',o==='All');b.onclick=()=>{activeOrigin=o;
+  [...filters.children].forEach(c=>c.setAttribute('aria-pressed',c===b));drawDict();};filters.appendChild(b);});
+const sorted=[...LEX].sort((a,b)=>a.n.localeCompare(b.n));
+function drawDict(){
+  const term=q.value.trim().toLowerCase();
+  const rows=sorted.filter(r=>{
+    if(activeOrigin!=='All'&&r.o!==activeOrigin)return false;
+    if(!term)return true;
+    return r.n.toLowerCase().includes(term)||r.e.toLowerCase().includes(term);
+  });
+  entries.innerHTML=rows.map(r=>(
+    '<div class="entry"><div class="term">'+esc(r.n)+'</div><div class="right">'+
+    '<div class="mean">'+esc(r.e)+' <span class="tag">'+(POS[r.p]||r.p)+'</span></div>'+
+    '<div class="ety">'+esc(r.t)+'</div>'+
+    '<span class="ori">'+esc(r.o)+'</span></div></div>'
+  )).join('');
+  nohits.hidden=rows.length>0;
+}
+q.addEventListener('input',drawDict);
+
+/* ---------- init ---------- */
+document.getElementById('count').textContent=LEX.length+' slovos loaded';
+syncToggles();
+if(!restoreHash()){ buildExamples(); src.value=SEED.en2nad; render(); }
+drawDict();
+</script>
+</body>
+</html>
